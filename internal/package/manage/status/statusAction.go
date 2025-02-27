@@ -61,7 +61,7 @@ func DeleteStatus(log *logger.Logger, dbConn *sql.DB, id string) error {
 	s.Start()
 
 	s.Suffix = " Initialize and run delete Status..."
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 	s.Stop()
 
 	// Try to insert the Status
@@ -88,7 +88,7 @@ func AddStatus(log *logger.Logger, dbConn *sql.DB) error {
 	s.Start()
 
 	s.Suffix = " Initialize and run add Status form..."
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 	s.Stop()
 
 	formValues, err := StatusForm.ShowStatusAddForm(log)

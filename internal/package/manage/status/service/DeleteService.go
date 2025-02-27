@@ -19,7 +19,7 @@ func (s *StatusService) DeleteStatus(StatusID string) error {
 	defer spin.Stop()
 
 	spin.Suffix = " Deleting Status data from database... \n"
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	// Execute database delete directly without retry
 	query := `DELETE FROM Status WHERE id = ?`

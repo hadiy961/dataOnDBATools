@@ -21,7 +21,7 @@ func GatherAllServer(log *logger.Logger, dbConn *sql.DB) error {
 		log.Error("Failed to retrieve server data", err)
 		return err
 	}
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 	if len(servers) > 0 {
 		for _, s := range servers {
 			cred, err := query.GetServerCredID(dbConn, s.ID)

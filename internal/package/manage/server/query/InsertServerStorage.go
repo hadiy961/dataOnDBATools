@@ -19,7 +19,7 @@ func InsertServerStorage(db *sql.DB, serverID int, storageList []utils.StorageIn
 
 	spin.Color("green")
 	spin.Start()
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 	defer spin.Stop()
 
 	// Current timestamp for created_at/updated_at
@@ -192,7 +192,7 @@ func InsertServerStorage(db *sql.DB, serverID int, storageList []utils.StorageIn
 	}
 
 	// Add a small pause to ensure spinner is visible
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	return nil
 }

@@ -17,7 +17,7 @@ func InsertServerDetail(db *sql.DB, serverID int, sysInfo *utils.SystemInfo) err
 	spin.Color("green")
 	spin.Suffix = fmt.Sprintf(" Saving system information for server_id %d...", serverID)
 	spin.Start()
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 	defer spin.Stop()
 
 	// Current timestamp for created_at/updated_at/last_check
@@ -166,7 +166,7 @@ func InsertServerDetail(db *sql.DB, serverID int, sysInfo *utils.SystemInfo) err
 	}
 
 	// Add a small pause to ensure spinner is visible
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	return nil
 }

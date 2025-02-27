@@ -26,7 +26,7 @@ func CheckSSHConnection(host string, port int, user, password string) (bool, err
 	defer client.Close()
 
 	// Add a slight delay so the spinner completion message is visible
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	return true, nil
 }

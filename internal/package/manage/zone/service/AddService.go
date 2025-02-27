@@ -33,7 +33,7 @@ func (s *ZoneService) InsertZone(zoneName, zoneDesc string) error {
 	defer spin.Stop()
 
 	spin.Suffix = " Inserting zone data into database... \n"
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	// Execute database insert directly without retry
 	query := `INSERT INTO zone (name, description, created_at, created_by, updated_by) VALUES (?, ?, NOW(), 'DBA','DBA')`

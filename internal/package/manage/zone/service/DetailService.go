@@ -19,7 +19,7 @@ func (s *ZoneService) GetZoneByIdDetail(zoneId string) (ZoneData, error) {
 	spin.Color("green")
 	spin.Suffix = " Retrieving zone data... \n"
 	spin.Start()
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	defer spin.Stop()
 

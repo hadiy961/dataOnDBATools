@@ -16,7 +16,7 @@ func GetServerCredID(db *sql.DB, id int) (*ServerCredential, error) {
 	spin.Color("green")
 	spin.Suffix = fmt.Sprintf(" Retrieving Server credential data with server_id %d...", id)
 	spin.Start()
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 	defer spin.Stop()
 
 	query := `
@@ -40,7 +40,7 @@ func GetServerCredID(db *sql.DB, id int) (*ServerCredential, error) {
 	}
 
 	// Add a small pause to ensure spinner is visible
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	return &cred, nil
 }

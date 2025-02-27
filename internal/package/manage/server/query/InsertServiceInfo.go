@@ -22,7 +22,7 @@ func InsertServiceInfo(db *sql.DB, services []utils.ServiceInfo) error {
 	spin.Suffix = fmt.Sprintf(" Analyzing service information for server_id %d...", services[0].ServerID)
 	spin.Color("green")
 	spin.Start()
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 	defer spin.Stop()
 
 	// Begin transaction
@@ -269,7 +269,7 @@ func InsertServiceInfo(db *sql.DB, services []utils.ServiceInfo) error {
 	} else {
 		spin.Suffix = fmt.Sprintf(" Service info updated: %d added, %d modified", inserted, updated)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	return nil
 }

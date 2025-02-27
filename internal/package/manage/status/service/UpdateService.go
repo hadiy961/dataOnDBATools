@@ -29,7 +29,7 @@ func (s *StatusService) GetStatusById(StatusId string) (StatusData, error) {
 	spin.Color("green")
 	spin.Suffix = " Retrieving Status data... \n"
 	spin.Start()
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	defer spin.Stop()
 
@@ -86,7 +86,7 @@ func (s *StatusService) UpdateStatus(StatusId string, name, desc string) error {
 	spin.Suffix = " Updating Status data...\n"
 	spin.Start()
 	defer spin.Stop()
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	// Execute database update directly
 	query := "UPDATE Status SET name = ?, description = ?, updated_by = 'DBA' WHERE id = ?"

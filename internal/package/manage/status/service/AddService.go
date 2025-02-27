@@ -33,7 +33,7 @@ func (s *StatusService) InsertStatus(StatusName, StatusDesc string) error {
 	defer spin.Stop()
 
 	spin.Suffix = " Inserting Status data into database... \n"
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	// Execute database insert directly without retry
 	query := `INSERT INTO Status (name, description, created_at, created_by, updated_by) VALUES (?, ?, NOW(), 'DBA','DBA')`
