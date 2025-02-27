@@ -1,0 +1,6 @@
+database:
+  db_host: 192.168.100.80  # or your database host
+  db_port: 3306       # default MySQL port
+  db_user: sst_user
+  db_pass: demo
+  db_name: dbsf_dba_tools
