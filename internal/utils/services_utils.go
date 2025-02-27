@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"bytes"
 	"context"
-	"dbaTools/internal/utils/ssh"
 	"fmt"
 	"os/exec"
 	"strconv"
@@ -59,40 +57,40 @@ func (sc *ServiceChecker) CheckServices(serverID int) ([]ServiceInfo, error) {
 }
 
 // executeCommand executes a command either locally or via SSH
-func (sc *ServiceChecker) executeCommand(command string) (string, error) {
-	if sc.isSSH {
-		// For SSH execution, use SSH client
-		client, err := ssh.GetSSHClient(sc.host, sc.port, sc.user, sc.password)
-		if err != nil {
-			return "", fmt.Errorf("SSH connection error: %w", err)
-		}
-		defer client.Close()
+// func (sc *ServiceChecker) executeCommand(command string) (string, error) {
+// 	if sc.isSSH {
+// 		// For SSH execution, use SSH client
+// 		client, err := ssh.GetSSHClient(sc.host, sc.port, sc.user, sc.password)
+// 		if err != nil {
+// 			return "", fmt.Errorf("SSH connection error: %w", err)
+// 		}
+// 		defer client.Close()
 
-		session, err := client.NewSession()
-		if err != nil {
-			return "", fmt.Errorf("failed to create SSH session: %w", err)
-		}
-		defer session.Close()
+// 		session, err := client.NewSession()
+// 		if err != nil {
+// 			return "", fmt.Errorf("failed to create SSH session: %w", err)
+// 		}
+// 		defer session.Close()
 
-		var out bytes.Buffer
-		session.Stdout = &out
-		err = session.Run(command)
-		if err != nil {
-			return "", fmt.Errorf("command execution failed: %w", err)
-		}
+// 		var out bytes.Buffer
+// 		session.Stdout = &out
+// 		err = session.Run(command)
+// 		if err != nil {
+// 			return "", fmt.Errorf("command execution failed: %w", err)
+// 		}
 
-		return strings.TrimSpace(out.String()), nil
-	} else {
-		// For local execution
-		cmdParts := []string{"/bin/sh", "-c", command}
-		output, err := exec.Command(cmdParts[0], cmdParts[1:]...).Output()
-		if err != nil {
-			return "", fmt.Errorf("command execution failed: %w", err)
-		}
+// 		return strings.TrimSpace(out.String()), nil
+// 	} else {
+// 		// For local execution
+// 		cmdParts := []string{"/bin/sh", "-c", command}
+// 		output, err := exec.Command(cmdParts[0], cmdParts[1:]...).Output()
+// 		if err != nil {
+// 			return "", fmt.Errorf("command execution failed: %w", err)
+// 		}
 
-		return strings.TrimSpace(string(output)), nil
-	}
-}
+// 		return strings.TrimSpace(string(output)), nil
+// 	}
+// }
 
 // checkMariaDB checks for MariaDB service
 func (sc *ServiceChecker) checkMariaDB(serverID int, now time.Time) (*ServiceInfo, error) {
@@ -263,173 +261,173 @@ func (sc *ServiceChecker) checkMaxScale(serverID int, now time.Time) (*ServiceIn
 }
 
 // checkNFSUtils checks for NFS utils
-func (sc *ServiceChecker) checkNFSUtils(serverID int, now time.Time) (*ServiceInfo, error) {
-	service := &ServiceInfo{
-		ServerID:    serverID,
-		ServiceName: "NFS Utils",
-		ServiceType: "filesystem",
-		LastChecked: now,
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	}
+// func (sc *ServiceChecker) checkNFSUtils(serverID int, now time.Time) (*ServiceInfo, error) {
+// 	service := &ServiceInfo{
+// 		ServerID:    serverID,
+// 		ServiceName: "NFS Utils",
+// 		ServiceType: "filesystem",
+// 		LastChecked: now,
+// 		CreatedAt:   now,
+// 		UpdatedAt:   now,
+// 	}
 
-	// Check if package is installed
-	checkCmd := "rpm -q nfs-utils 2>/dev/null || dpkg -l | grep nfs-common 2>/dev/null"
-	checkOutput, err := sc.executeCommand(checkCmd)
-	if err != nil || checkOutput == "" {
-		return nil, fmt.Errorf("NFS Utils not installed")
-	}
+// 	// Check if package is installed
+// 	checkCmd := "rpm -q nfs-utils 2>/dev/null || dpkg -l | grep nfs-common 2>/dev/null"
+// 	checkOutput, err := sc.executeCommand(checkCmd)
+// 	if err != nil || checkOutput == "" {
+// 		return nil, fmt.Errorf("NFS Utils not installed")
+// 	}
 
-	// Extract version
-	versionParts := strings.Fields(checkOutput)
-	if len(versionParts) > 0 {
-		for _, part := range versionParts {
-			if strings.Contains(part, "-") {
-				parts := strings.Split(part, "-")
-				if len(parts) >= 2 {
-					service.Version = parts[1]
-					break
-				}
-			}
-		}
-	}
+// 	// Extract version
+// 	versionParts := strings.Fields(checkOutput)
+// 	if len(versionParts) > 0 {
+// 		for _, part := range versionParts {
+// 			if strings.Contains(part, "-") {
+// 				parts := strings.Split(part, "-")
+// 				if len(parts) >= 2 {
+// 					service.Version = parts[1]
+// 					break
+// 				}
+// 			}
+// 		}
+// 	}
 
-	// Check status of NFS service
-	statusCmd := "systemctl is-active nfs-server 2>/dev/null || systemctl is-active nfs-kernel-server 2>/dev/null"
-	statusOutput, err := sc.executeCommand(statusCmd)
-	if err == nil && statusOutput == "active" {
-		service.Status = "running"
-	} else {
-		service.Status = "installed"
-	}
+// 	// Check status of NFS service
+// 	statusCmd := "systemctl is-active nfs-server 2>/dev/null || systemctl is-active nfs-kernel-server 2>/dev/null"
+// 	statusOutput, err := sc.executeCommand(statusCmd)
+// 	if err == nil && statusOutput == "active" {
+// 		service.Status = "running"
+// 	} else {
+// 		service.Status = "installed"
+// 	}
 
-	// Check config file
-	configCmd := "echo /etc/exports"
-	configOutput, err := sc.executeCommand(configCmd)
-	if err == nil && configOutput != "" {
-		service.ConfigFile = configOutput
-	}
+// 	// Check config file
+// 	configCmd := "echo /etc/exports"
+// 	configOutput, err := sc.executeCommand(configCmd)
+// 	if err == nil && configOutput != "" {
+// 		service.ConfigFile = configOutput
+// 	}
 
-	// Check install path
-	installPathCmd := "which showmount 2>/dev/null || echo /usr/sbin/showmount"
-	installPathOutput, err := sc.executeCommand(installPathCmd)
-	if err == nil && installPathOutput != "" {
-		service.InstallPath = installPathOutput
-	}
+// 	// Check install path
+// 	installPathCmd := "which showmount 2>/dev/null || echo /usr/sbin/showmount"
+// 	installPathOutput, err := sc.executeCommand(installPathCmd)
+// 	if err == nil && installPathOutput != "" {
+// 		service.InstallPath = installPathOutput
+// 	}
 
-	// Check auto start
-	autoStartCmd := "systemctl is-enabled nfs-server 2>/dev/null || systemctl is-enabled nfs-kernel-server 2>/dev/null"
-	autoStartOutput, err := sc.executeCommand(autoStartCmd)
-	if err == nil && autoStartOutput == "enabled" {
-		service.AutoStart = true
-	} else {
-		service.AutoStart = false
-	}
+// 	// Check auto start
+// 	autoStartCmd := "systemctl is-enabled nfs-server 2>/dev/null || systemctl is-enabled nfs-kernel-server 2>/dev/null"
+// 	autoStartOutput, err := sc.executeCommand(autoStartCmd)
+// 	if err == nil && autoStartOutput == "enabled" {
+// 		service.AutoStart = true
+// 	} else {
+// 		service.AutoStart = false
+// 	}
 
-	return service, nil
-}
+// 	return service, nil
+// }
 
 // checkSSHPass checks for sshpass
-func (sc *ServiceChecker) checkSSHPass(serverID int, now time.Time) (*ServiceInfo, error) {
-	service := &ServiceInfo{
-		ServerID:    serverID,
-		ServiceName: "SSHPass",
-		ServiceType: "utility",
-		LastChecked: now,
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	}
+// func (sc *ServiceChecker) checkSSHPass(serverID int, now time.Time) (*ServiceInfo, error) {
+// 	service := &ServiceInfo{
+// 		ServerID:    serverID,
+// 		ServiceName: "SSHPass",
+// 		ServiceType: "utility",
+// 		LastChecked: now,
+// 		CreatedAt:   now,
+// 		UpdatedAt:   now,
+// 	}
 
-	// Check if command is available
-	versionCmd := "sshpass -V 2>&1 | head -1"
-	versionOutput, err := sc.executeCommand(versionCmd)
-	if err != nil || versionOutput == "" {
-		return nil, fmt.Errorf("SSHPass not installed")
-	}
+// 	// Check if command is available
+// 	versionCmd := "sshpass -V 2>&1 | head -1"
+// 	versionOutput, err := sc.executeCommand(versionCmd)
+// 	if err != nil || versionOutput == "" {
+// 		return nil, fmt.Errorf("SSHPass not installed")
+// 	}
 
-	// Extract version
-	versionParts := strings.Fields(versionOutput)
-	if len(versionParts) > 0 {
-		for _, part := range versionParts {
-			if strings.Contains(part, ".") {
-				service.Version = part
-				break
-			}
-		}
-	}
+// 	// Extract version
+// 	versionParts := strings.Fields(versionOutput)
+// 	if len(versionParts) > 0 {
+// 		for _, part := range versionParts {
+// 			if strings.Contains(part, ".") {
+// 				service.Version = part
+// 				break
+// 			}
+// 		}
+// 	}
 
-	// No service status for sshpass as it's a utility, not a daemon
-	service.Status = "installed"
+// 	// No service status for sshpass as it's a utility, not a daemon
+// 	service.Status = "installed"
 
-	// No port for sshpass
-	service.Port = 0
+// 	// No port for sshpass
+// 	service.Port = 0
 
-	// No config file for sshpass
-	service.ConfigFile = "N/A"
+// 	// No config file for sshpass
+// 	service.ConfigFile = "N/A"
 
-	// Check install path
-	installPathCmd := "which sshpass 2>/dev/null"
-	installPathOutput, err := sc.executeCommand(installPathCmd)
-	if err == nil && installPathOutput != "" {
-		service.InstallPath = installPathOutput
-	}
+// 	// Check install path
+// 	installPathCmd := "which sshpass 2>/dev/null"
+// 	installPathOutput, err := sc.executeCommand(installPathCmd)
+// 	if err == nil && installPathOutput != "" {
+// 		service.InstallPath = installPathOutput
+// 	}
 
-	// No auto start for sshpass
-	service.AutoStart = false
+// 	// No auto start for sshpass
+// 	service.AutoStart = false
 
-	return service, nil
-}
+// 	return service, nil
+// }
 
 // checkNetTools checks for net-tools
-func (sc *ServiceChecker) checkNetTools(serverID int, now time.Time) (*ServiceInfo, error) {
-	service := &ServiceInfo{
-		ServerID:    serverID,
-		ServiceName: "Net Tools",
-		ServiceType: "utility",
-		LastChecked: now,
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	}
+// func (sc *ServiceChecker) checkNetTools(serverID int, now time.Time) (*ServiceInfo, error) {
+// 	service := &ServiceInfo{
+// 		ServerID:    serverID,
+// 		ServiceName: "Net Tools",
+// 		ServiceType: "utility",
+// 		LastChecked: now,
+// 		CreatedAt:   now,
+// 		UpdatedAt:   now,
+// 	}
 
-	// Check if package is installed
-	checkCmd := "rpm -q net-tools 2>/dev/null || dpkg -l | grep net-tools 2>/dev/null"
-	checkOutput, err := sc.executeCommand(checkCmd)
-	if err != nil || checkOutput == "" {
-		return nil, fmt.Errorf("Net Tools not installed")
-	}
+// 	// Check if package is installed
+// 	checkCmd := "rpm -q net-tools 2>/dev/null || dpkg -l | grep net-tools 2>/dev/null"
+// 	checkOutput, err := sc.executeCommand(checkCmd)
+// 	if err != nil || checkOutput == "" {
+// 		return nil, fmt.Errorf("Net Tools not installed")
+// 	}
 
-	// Extract version
-	versionParts := strings.Fields(checkOutput)
-	if len(versionParts) > 0 {
-		for _, part := range versionParts {
-			if strings.Contains(part, "-") || strings.Contains(part, ".") {
-				service.Version = part
-				break
-			}
-		}
-	}
+// 	// Extract version
+// 	versionParts := strings.Fields(checkOutput)
+// 	if len(versionParts) > 0 {
+// 		for _, part := range versionParts {
+// 			if strings.Contains(part, "-") || strings.Contains(part, ".") {
+// 				service.Version = part
+// 				break
+// 			}
+// 		}
+// 	}
 
-	// No service status for net-tools as it's a utility, not a daemon
-	service.Status = "installed"
+// 	// No service status for net-tools as it's a utility, not a daemon
+// 	service.Status = "installed"
 
-	// No port for net-tools
-	service.Port = 0
+// 	// No port for net-tools
+// 	service.Port = 0
 
-	// No config file for net-tools
-	service.ConfigFile = "N/A"
+// 	// No config file for net-tools
+// 	service.ConfigFile = "N/A"
 
-	// Check install path for a common nettools command (netstat)
-	installPathCmd := "which netstat 2>/dev/null"
-	installPathOutput, err := sc.executeCommand(installPathCmd)
-	if err == nil && installPathOutput != "" {
-		service.InstallPath = installPathOutput
-	}
+// 	// Check install path for a common nettools command (netstat)
+// 	installPathCmd := "which netstat 2>/dev/null"
+// 	installPathOutput, err := sc.executeCommand(installPathCmd)
+// 	if err == nil && installPathOutput != "" {
+// 		service.InstallPath = installPathOutput
+// 	}
 
-	// No auto start for net-tools
-	service.AutoStart = false
+// 	// No auto start for net-tools
+// 	service.AutoStart = false
 
-	return service, nil
-}
+// 	return service, nil
+// }
 
 // Colorize status text based on service status
 func ColorizeStatus(status string) string {

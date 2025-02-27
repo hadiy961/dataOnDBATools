@@ -34,7 +34,7 @@ type ServiceChecker struct {
 	password string
 }
 
-// StorageInfo menyimpan informasi tentang penyimpanan
+// StorageInfo menyimpan informasi tentang penyimpanand asdasdasd
 type StorageInfo struct {
 	DeviceName     string
 	FilesystemType string
