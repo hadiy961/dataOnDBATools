@@ -19,7 +19,7 @@ func (s *ZoneService) DeleteZone(zoneID string) error {
 	defer spin.Stop()
 
 	spin.Suffix = " Deleting zone data from database... \n"
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	// Execute database delete directly without retry
 	query := `DELETE FROM zone WHERE id = ?`

@@ -19,7 +19,7 @@ func (s *StatusService) GetStatusByIdDetail(StatusId string) (StatusData, error)
 	spin.Color("green")
 	spin.Suffix = " Retrieving Status data... \n"
 	spin.Start()
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	defer spin.Stop()
 

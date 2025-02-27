@@ -23,7 +23,7 @@ func AllServerCheck(log *logger.Logger, dbConn *sql.DB) error {
 	}
 
 	// Allow time for spinner to finish
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	// Define a counter for successful connections
 	successCount := 0
 

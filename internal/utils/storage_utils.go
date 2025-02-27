@@ -95,7 +95,7 @@ func GetServerStorage(isSSH bool, host string, port int, user, password string) 
 		}
 	}
 
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	return storageInfoList, nil
 }

@@ -202,7 +202,7 @@ func GetSystemInfoNew(isSSH bool, host string, port int, user, password string) 
 		OSVersion: results[5],
 	}
 
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	return sysInfo, nil
 }

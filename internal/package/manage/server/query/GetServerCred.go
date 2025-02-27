@@ -4,20 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-
-	"github.com/briandowns/spinner"
 )
 
 // GetServerCredID retrieves a single server credential record by server ID
 func GetServerCredID(db *sql.DB, id int) (*ServerCredential, error) {
-	// Initialize spinner
-	spin := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
-	spin.Prefix = "[ Server Check ] "
-	spin.Color("green")
-	spin.Suffix = fmt.Sprintf(" Retrieving Server credential data with server_id %d...", id)
-	spin.Start()
-	time.Sleep(101 * time.Millisecond)
-	defer spin.Stop()
 
 	query := `
 		SELECT 
@@ -38,9 +28,8 @@ func GetServerCredID(db *sql.DB, id int) (*ServerCredential, error) {
 		}
 		return nil, fmt.Errorf("database query error: %w", err)
 	}
-
 	// Add a small pause to ensure spinner is visible
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	return &cred, nil
 }

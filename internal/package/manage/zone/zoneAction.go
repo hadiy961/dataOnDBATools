@@ -61,7 +61,7 @@ func DeleteZone(log *logger.Logger, dbConn *sql.DB, id string) error {
 	s.Start()
 
 	s.Suffix = " Initialize and run delete zone..."
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	s.Stop()
 
 	// Try to insert the zone
@@ -88,7 +88,7 @@ func AddZone(log *logger.Logger, dbConn *sql.DB) error {
 	s.Start()
 
 	s.Suffix = " Initialize and run add zone form..."
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	s.Stop()
 
 	formValues, err := zoneForm.ShowZoneAddForm(log)

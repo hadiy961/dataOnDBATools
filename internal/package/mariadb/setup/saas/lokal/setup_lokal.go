@@ -25,7 +25,7 @@ func checkMariaDBStatus(log *logger.Logger, s *spinner.Spinner) (*ServiceStatus,
 
 	// Update spinner text
 	s.Suffix = " Checking MariaDB installation... \n"
-	time.Sleep(101 * time.Millisecond) // Give users a chance to see the message
+	time.Sleep(200 * time.Millisecond) // Give users a chance to see the message
 
 	// Check if MariaDB is installed by looking for the binary
 	mariaPath, err := exec.LookPath("mariadb")
@@ -39,7 +39,7 @@ func checkMariaDBStatus(log *logger.Logger, s *spinner.Spinner) (*ServiceStatus,
 
 	// Update spinner for version check
 	s.Suffix = " Detecting MariaDB version... \n"
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	// Get MariaDB version
 	versionCmd := exec.Command("mariadb", "--version")
@@ -54,7 +54,7 @@ func checkMariaDBStatus(log *logger.Logger, s *spinner.Spinner) (*ServiceStatus,
 
 	// Update spinner for service check
 	s.Suffix = " Checking MariaDB service status... \n"
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	// Check if MariaDB service is running
 	serviceCmd := exec.Command("systemctl", "is-active", "mariadb")
@@ -85,7 +85,7 @@ func Setup(log *logger.Logger) error {
 
 	// Check if running as root
 	s.Suffix = " Checking privileges..."
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	if os.Geteuid() != 0 {
 		s.Stop()
@@ -94,7 +94,7 @@ func Setup(log *logger.Logger) error {
 	}
 
 	s.Suffix = " Initializing MariaDB service check..."
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	status, err := checkMariaDBStatus(log, s)
 	if err != nil {

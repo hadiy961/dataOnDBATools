@@ -17,7 +17,7 @@ func GetAllServerHead(db *sql.DB) ([]ServerHead, error) {
 	spin.Color("green")
 	spin.Suffix = " Retrieving All Server data..."
 	spin.Start()
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	defer spin.Stop()
 
 	query := `
@@ -72,7 +72,7 @@ func GetAllServerHead(db *sql.DB) ([]ServerHead, error) {
 	}
 
 	// Add a small pause to ensure spinner is visible
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	return servers, nil
 }
@@ -85,7 +85,7 @@ func GetServerHeadByID(db *sql.DB, id int) (*ServerHead, error) {
 	spin.Color("green")
 	spin.Suffix = fmt.Sprintf(" Retrieving Server data with id %d...", id)
 	spin.Start()
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	defer spin.Stop()
 
 	query := `
@@ -129,7 +129,7 @@ func GetServerHeadByID(db *sql.DB, id int) (*ServerHead, error) {
 	}
 
 	// Add a small pause to ensure spinner is visible
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	return &s, nil
 }

@@ -20,13 +20,16 @@ func CheckSSHConnection(host string, port int, user, password string) (bool, err
 	// Get SSH client
 	client, err := GetSSHClient(host, port, user, password)
 	if err != nil {
+		spin.Stop()
+
 		spin.FinalMSG = fmt.Sprintf("Connection to %s@%s:%d failed.\n", user, host, port)
 		return false, err
 	}
 	defer client.Close()
+	spin.Stop()
 
 	// Add a slight delay so the spinner completion message is visible
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	return true, nil
 }

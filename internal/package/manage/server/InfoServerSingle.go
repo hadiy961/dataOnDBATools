@@ -25,7 +25,7 @@ func GetServerInfoByID(log *logger.Logger, dbConn *sql.DB, id int) error {
 		log.Error("Failed to retrieve server data", err)
 		return err
 	}
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	cred, err := query.GetServerCredID(dbConn, servers.ID)
 	if err != nil {

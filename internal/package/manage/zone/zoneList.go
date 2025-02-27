@@ -27,7 +27,7 @@ func getZones(db *sql.DB) ([]Zone, error) {
 	spin.Color("green")
 	spin.Suffix = " Retrieving zone data... \n"
 	spin.Start()
-	time.Sleep(101 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	defer spin.Stop()
 
