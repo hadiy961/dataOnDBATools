@@ -7,7 +7,7 @@ import (
 	"dbaTools/internal/logger"
 	StatusService "dbaTools/internal/package/manage/status/service"
 	tables "dbaTools/internal/ui/component/table"
-	TUIutils "dbaTools/internal/ui/component/utils"
+	"dbaTools/internal/utils"
 	"fmt"
 )
 
@@ -36,7 +36,7 @@ func getStatuss(db *sql.DB) ([]Status, error) {
 }
 
 func DisplayStatusList(log *logger.Logger, dbConn *sql.DB) error {
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 	// Get DB connection using singleton pattern
 	cfg, err := config.New()
 	if err != nil {
@@ -94,7 +94,7 @@ func DisplayStatusList(log *logger.Logger, dbConn *sql.DB) error {
 		// Jalankan tabel
 		tables.RunTable(table)
 	} else {
-		TUIutils.ClearScreen()
+		utils.ClearScreen()
 		log.Info("Tidak ada data")
 	}
 
@@ -102,7 +102,7 @@ func DisplayStatusList(log *logger.Logger, dbConn *sql.DB) error {
 }
 
 func DisplayStatusDetail(log *logger.Logger, dbConn *sql.DB, id string) error {
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 
 	// Get DB connection using singleton pattern
 	cfg, err := config.New()

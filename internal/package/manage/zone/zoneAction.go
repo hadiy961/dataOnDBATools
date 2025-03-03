@@ -5,7 +5,7 @@ import (
 	"dbaTools/internal/logger"
 	zoneForm "dbaTools/internal/package/manage/zone/form"
 	zoneService "dbaTools/internal/package/manage/zone/service"
-	TUIutils "dbaTools/internal/ui/component/utils"
+	"dbaTools/internal/utils"
 	"fmt"
 	"time"
 
@@ -15,7 +15,7 @@ import (
 // UpdateZone menjalankan proses update zona
 func UpdateZone(logger *logger.Logger, db *sql.DB, zoneId string) error {
 	logger.Info(fmt.Sprintf("Starting Zone Update for ID: %s", zoneId))
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 
 	// Create service
 	service := zoneService.NewZoneService(db, logger)
@@ -50,7 +50,7 @@ func UpdateZone(logger *logger.Logger, db *sql.DB, zoneId string) error {
 // AddZone handles the zone addition workflow
 func DeleteZone(log *logger.Logger, dbConn *sql.DB, id string) error {
 	log.Info("Starting Zone Delete Action")
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 
 	service := zoneService.NewZoneService(dbConn, log)
 
@@ -77,7 +77,7 @@ func DeleteZone(log *logger.Logger, dbConn *sql.DB, id string) error {
 // AddZone handles the zone addition workflow
 func AddZone(log *logger.Logger, dbConn *sql.DB) error {
 	log.Info("Starting Zone Add Form")
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 
 	service := zoneService.NewZoneService(dbConn, log)
 

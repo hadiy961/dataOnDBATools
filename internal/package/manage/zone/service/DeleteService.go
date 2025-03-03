@@ -1,7 +1,7 @@
 package zoneService
 
 import (
-	TUIutils "dbaTools/internal/ui/component/utils"
+	"dbaTools/internal/utils"
 	"fmt"
 	"time"
 
@@ -10,7 +10,7 @@ import (
 
 // DeleteZone deletes a zone without retry logic
 func (s *ZoneService) DeleteZone(zoneID string) error {
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 	// Initialize spinner
 	spin := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	spin.Prefix = "[ Zone Delete ] "

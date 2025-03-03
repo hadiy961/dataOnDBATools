@@ -5,7 +5,7 @@ import (
 	"dbaTools/internal/logger"
 	StatusForm "dbaTools/internal/package/manage/status/form"
 	StatusService "dbaTools/internal/package/manage/status/service"
-	TUIutils "dbaTools/internal/ui/component/utils"
+	"dbaTools/internal/utils"
 	"fmt"
 	"time"
 
@@ -15,7 +15,7 @@ import (
 // UpdateStatus menjalankan proses update zona
 func UpdateStatus(logger *logger.Logger, db *sql.DB, StatusId string) error {
 	logger.Info(fmt.Sprintf("Starting Status Update for ID: %s", StatusId))
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 
 	// Create service
 	service := StatusService.NewStatusService(db, logger)
@@ -50,7 +50,7 @@ func UpdateStatus(logger *logger.Logger, db *sql.DB, StatusId string) error {
 // AddStatus handles the Status addition workflow
 func DeleteStatus(log *logger.Logger, dbConn *sql.DB, id string) error {
 	log.Info("Starting Status Delete Action")
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 
 	service := StatusService.NewStatusService(dbConn, log)
 
@@ -77,7 +77,7 @@ func DeleteStatus(log *logger.Logger, dbConn *sql.DB, id string) error {
 // AddStatus handles the Status addition workflow
 func AddStatus(log *logger.Logger, dbConn *sql.DB) error {
 	log.Info("Starting Status Add Form")
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 
 	service := StatusService.NewStatusService(dbConn, log)
 

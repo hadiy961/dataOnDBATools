@@ -1,7 +1,7 @@
 package StatusService
 
 import (
-	TUIutils "dbaTools/internal/ui/component/utils"
+	"dbaTools/internal/utils"
 	"fmt"
 	"time"
 
@@ -10,7 +10,7 @@ import (
 
 // DeleteStatus deletes a Status without retry logic
 func (s *StatusService) DeleteStatus(StatusID string) error {
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 	// Initialize spinner
 	spin := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	spin.Prefix = "[ Status Delete ] "

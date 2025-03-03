@@ -7,7 +7,7 @@ import (
 	"dbaTools/internal/logger"
 	zoneService "dbaTools/internal/package/manage/zone/service"
 	tables "dbaTools/internal/ui/component/table"
-	TUIutils "dbaTools/internal/ui/component/utils"
+	"dbaTools/internal/utils"
 	"fmt"
 	"time"
 
@@ -49,7 +49,7 @@ func getZones(db *sql.DB) ([]Zone, error) {
 }
 
 func DisplayZoneList(log *logger.Logger, dbConn *sql.DB) error {
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 	// Get DB connection using singleton pattern
 	cfg, err := config.New()
 	if err != nil {
@@ -107,7 +107,7 @@ func DisplayZoneList(log *logger.Logger, dbConn *sql.DB) error {
 		// Jalankan tabel
 		tables.RunTable(table)
 	} else {
-		TUIutils.ClearScreen()
+		utils.ClearScreen()
 		log.Info("Tidak ada data")
 	}
 
@@ -115,7 +115,7 @@ func DisplayZoneList(log *logger.Logger, dbConn *sql.DB) error {
 }
 
 func DisplayZoneDetail(log *logger.Logger, dbConn *sql.DB, id string) error {
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 
 	// Get DB connection using singleton pattern
 	cfg, err := config.New()

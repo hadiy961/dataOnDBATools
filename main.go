@@ -4,7 +4,7 @@ import (
 	"dbaTools/cmd"
 	"dbaTools/internal/config"
 	"dbaTools/internal/logger"
-	TUIutils "dbaTools/internal/ui/component/utils"
+	"dbaTools/internal/utils"
 	"log"
 	"os"
 	"strings"
@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	TUIutils.ClearScreen()
+	utils.ClearScreen()
 	// Access settings
 	settings := config.GetSettings()
 
