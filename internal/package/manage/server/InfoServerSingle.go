@@ -8,6 +8,7 @@ import (
 	"dbaTools/internal/utils/ssh"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/olekukonko/tablewriter"
@@ -15,7 +16,9 @@ import (
 
 func GetServerInfoByID(log *logger.Logger, dbConn *sql.DB, id int) error {
 	// Use the provided database connection instead of trying to get a new one
+	// Check if database connection is nil
 	if dbConn == nil {
+		log.Error("Database connection is nil", fmt.Errorf("invalid database connection"))
 		return fmt.Errorf("invalid database connection")
 	}
 
@@ -25,6 +28,12 @@ func GetServerInfoByID(log *logger.Logger, dbConn *sql.DB, id int) error {
 		log.Error("Failed to retrieve server data", err)
 		return err
 	}
+	// Check if server data is nil
+	if servers == nil {
+		log.Error("No server found with ID", fmt.Errorf("server with ID %d not found", id))
+		return fmt.Errorf("server with ID %d not found", id)
+	}
+
 	time.Sleep(200 * time.Millisecond)
 
 	cred, err := query.GetServerCredID(dbConn, servers.ID)
@@ -51,12 +60,81 @@ func GetServerInfoByID(log *logger.Logger, dbConn *sql.DB, id int) error {
 	} else if connected {
 		fmt.Printf("SSH Connection: \033[32mSUCCESSFUL\033[0m\n\n")
 
-		// Get system info
-		sysInfo, infoErr := utils.GetSystemInfoNew(true, cred.IPAddress, cred.Port, cred.User, cred.Pass)
-		if infoErr != nil {
-			log.Error(fmt.Sprintf("Failed to retrieve system info for %s (%s)", servers.Name, cred.IPAddress), infoErr)
-			fmt.Printf("System Information: \033[31mFAILED\033[0m (%s)\n", infoErr.Error())
-		} else {
+		// Define channels to collect results from concurrent operations
+		sysInfoCh := make(chan *utils.SystemInfo, 1)
+		sysInfoErrCh := make(chan error, 1)
+		storageInfoCh := make(chan []utils.StorageInfo, 1)
+		storageInfoErrCh := make(chan error, 1)
+		serviceInfoCh := make(chan []utils.ServiceInfo, 1)
+		serviceInfoErrCh := make(chan error, 1)
+
+		// WaitGroup to ensure all goroutines complete
+		var wg sync.WaitGroup
+		wg.Add(3) // Adding 3 for the three concurrent operations
+
+		// Create a mutex for synchronized console output
+		var outputMutex sync.Mutex
+
+		// Goroutine for system info
+		go func() {
+			defer wg.Done()
+			sysInfo, infoErr := utils.GetSystemInfoNew(true, cred.IPAddress, cred.Port, cred.User, cred.Pass)
+			if infoErr != nil {
+				sysInfoErrCh <- infoErr
+				sysInfoCh <- nil
+				return
+			}
+			sysInfoCh <- sysInfo
+			sysInfoErrCh <- nil
+		}()
+
+		// Goroutine for storage info
+		go func() {
+			defer wg.Done()
+			storageInfo, storageErr := utils.GetServerStorage(true, cred.IPAddress, cred.Port, cred.User, cred.Pass)
+			if storageErr != nil {
+				storageInfoErrCh <- storageErr
+				storageInfoCh <- nil
+				return
+			}
+			storageInfoCh <- storageInfo
+			storageInfoErrCh <- nil
+		}()
+
+		// Goroutine for service info
+		go func() {
+			defer wg.Done()
+			serviceChecker := utils.NewServiceChecker(true, cred.IPAddress, cred.Port, cred.User, cred.Pass)
+			services, serviceErr := serviceChecker.CheckServices(servers.ID)
+			if serviceErr != nil {
+				serviceInfoErrCh <- serviceErr
+				serviceInfoCh <- nil
+				return
+			}
+			serviceInfoCh <- services
+			serviceInfoErrCh <- nil
+		}()
+
+		// Wait for all goroutines to complete
+		wg.Wait()
+
+		// Close all channels
+		close(sysInfoCh)
+		close(sysInfoErrCh)
+		close(storageInfoCh)
+		close(storageInfoErrCh)
+		close(serviceInfoCh)
+		close(serviceInfoErrCh)
+
+		// Process system information result
+		sysInfo := <-sysInfoCh
+		sysInfoErr := <-sysInfoErrCh
+
+		outputMutex.Lock()
+		if sysInfoErr != nil {
+			log.Error(fmt.Sprintf("Failed to retrieve system info for %s (%s)", servers.Name, cred.IPAddress), sysInfoErr)
+			fmt.Printf("System Information: \033[31mFAILED\033[0m (%s)\n", sysInfoErr.Error())
+		} else if sysInfo != nil {
 			// Display system information using tablewriter
 			fmt.Println("System Information:")
 			table := tablewriter.NewWriter(os.Stdout)
@@ -75,6 +153,7 @@ func GetServerInfoByID(log *logger.Logger, dbConn *sql.DB, id int) error {
 			table.Append([]string{"Total RAM", sysInfo.TotalRAM})
 
 			table.Render()
+
 			// Save the system information to the database
 			if err := query.InsertServerDetail(dbConn, servers.ID, sysInfo); err != nil {
 				log.Error(fmt.Sprintf("Failed to save system info for %s (%s)", servers.Name, cred.IPAddress), err)
@@ -83,13 +162,17 @@ func GetServerInfoByID(log *logger.Logger, dbConn *sql.DB, id int) error {
 			}
 			fmt.Println()
 		}
+		outputMutex.Unlock()
 
-		// After successfully getting system info, get storage info
-		storageInfoList, storageErr := utils.GetServerStorage(true, cred.IPAddress, cred.Port, cred.User, cred.Pass)
-		if storageErr != nil {
-			log.Error(fmt.Sprintf("Failed to retrieve storage info for %s (%s)", servers.Name, cred.IPAddress), storageErr)
-			fmt.Printf("Storage Information: \033[31mFAILED\033[0m (%s)\n", storageErr.Error())
-		} else {
+		// Process storage information result
+		storageInfoList := <-storageInfoCh
+		storageInfoErr := <-storageInfoErrCh
+
+		outputMutex.Lock()
+		if storageInfoErr != nil {
+			log.Error(fmt.Sprintf("Failed to retrieve storage info for %s (%s)", servers.Name, cred.IPAddress), storageInfoErr)
+			fmt.Printf("Storage Information: \033[31mFAILED\033[0m (%s)\n", storageInfoErr.Error())
+		} else if storageInfoList != nil {
 			// Display storage information using tablewriter
 			fmt.Println("Storage Information:")
 
@@ -118,29 +201,27 @@ func GetServerInfoByID(log *logger.Logger, dbConn *sql.DB, id int) error {
 			}
 
 			table.Render()
-			// After successfully getting system info
-			storageInfoList, storageErr := utils.GetServerStorage(true, cred.IPAddress, cred.Port, cred.User, cred.Pass)
-			if storageErr != nil {
-				log.Error(fmt.Sprintf("Failed to retrieve storage info for %s (%s)", servers.Name, cred.IPAddress), storageErr)
+
+			// Save storage information to database
+			if err := query.InsertServerStorage(dbConn, servers.ID, storageInfoList); err != nil {
+				log.Error(fmt.Sprintf("Failed to save storage info for %s", servers.Name), err)
 			} else {
-				// Save storage information to database
-				if err := query.InsertServerStorage(dbConn, servers.ID, storageInfoList); err != nil {
-					log.Error(fmt.Sprintf("Failed to save storage info for %s", servers.Name), err)
-				} else {
-					log.Info(fmt.Sprintf("Storage information for %s (%s) saved to database", servers.Name, cred.IPAddress))
-				}
+				log.Info(fmt.Sprintf("Storage information for %s (%s) saved to database", servers.Name, cred.IPAddress))
 			}
 			fmt.Println()
 		}
+		outputMutex.Unlock()
 
-		// Check services
+		// Process service information result
+		services := <-serviceInfoCh
+		serviceInfoErr := <-serviceInfoErrCh
+
+		outputMutex.Lock()
 		fmt.Println("Service Information:")
-		serviceChecker := utils.NewServiceChecker(true, cred.IPAddress, cred.Port, cred.User, cred.Pass)
-		services, serviceErr := serviceChecker.CheckServices(servers.ID)
-
-		if serviceErr != nil {
-			log.Error(fmt.Sprintf("Failed to retrieve service info for %s (%s)", servers.Name, cred.IPAddress), serviceErr)
-		} else {
+		if serviceInfoErr != nil {
+			log.Error(fmt.Sprintf("Failed to retrieve service info for %s (%s)", servers.Name, cred.IPAddress), serviceInfoErr)
+			fmt.Printf("Service Information: \033[31mFAILED\033[0m (%s)\n", serviceInfoErr.Error())
+		} else if services != nil {
 			// Display service information using tablewriter
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Service", "Type", "Status", "Version", "Port", "Auto Start", "Install Path", "Config Path"})
@@ -170,6 +251,7 @@ func GetServerInfoByID(log *logger.Logger, dbConn *sql.DB, id int) error {
 			}
 
 			table.Render()
+
 			// Save service information to database
 			if err := query.InsertServiceInfo(dbConn, services); err != nil {
 				log.Error(fmt.Sprintf("Failed to save service info for %s", servers.Name), err)
@@ -177,6 +259,7 @@ func GetServerInfoByID(log *logger.Logger, dbConn *sql.DB, id int) error {
 				log.Info(fmt.Sprintf("Service information for %s (%s) saved to database", servers.Name, cred.IPAddress))
 			}
 		}
+		outputMutex.Unlock()
 	}
 
 	return nil
