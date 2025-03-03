@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/pflag"
 )
 
+var serverId int
+
 var ListServerCMD = &cobra.Command{
 	Use:   "info",
 	Short: "Server information",

@@ -163,8 +163,8 @@ echo "$VERSION $INSTALL_PATH $CONFIG_PATH"
 	return service, nil
 }
 
-// checkMaxScale checks for MaxScale service with simplified approach
-func (sc *ServiceChecker) checkMaxScale(serverID int, now time.Time) (*ServiceInfo, error) {
+func (sc ServiceChecker) checkMaxScale(serverID int, now time.Time) (*ServiceInfo, error) {
+	// Initialize with defaults
 	service := &ServiceInfo{
 		ServerID:    serverID,
 		ServiceName: "MaxScale",
@@ -172,60 +172,63 @@ func (sc *ServiceChecker) checkMaxScale(serverID int, now time.Time) (*ServiceIn
 		LastChecked: now,
 		CreatedAt:   now,
 		UpdatedAt:   now,
-		Port:        4006, // Set default port
+		Port:        4006, // Default port
+		Status:      "stopped",
 	}
 
-	// Quick check if MaxScale is installed
-	checkCmd := "which maxscale >/dev/null 2>&1; echo $?"
-	checkOutput, err := sc.executeCommand(checkCmd)
-	if err != nil || strings.TrimSpace(checkOutput) != "0" {
+	// Check if MaxScale is installed
+	if output, err := sc.executeCommand("which maxscale 2>/dev/null"); err != nil || output == "" {
 		return nil, fmt.Errorf("MaxScale not installed")
 	}
 
-	// Get version - simplified
-	versionCmd := "maxscale --version 2>/dev/null | grep -o '[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+' | head -1"
-	versionOutput, _ := sc.executeCommand(versionCmd)
-	if versionOutput != "" {
-		service.Version = strings.TrimSpace(versionOutput)
+	// Combined command to get multiple pieces of information at once
+	infoCmd := `
+    VERSION=$(maxscale --version 2>/dev/null | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' | head -1)
+    STATUS=$(systemctl is-active maxscale 2>/dev/null)
+    ENABLED=$(systemctl is-enabled maxscale 2>/dev/null)
+    PORT=$(ss -tulpn 2>/dev/null | grep maxscale | grep LISTEN | awk '{print $5}' | awk -F: '{print $NF}' | head -1)
+    CONFIG=$(find /etc -name maxscale.cnf 2>/dev/null | head -1)
+    BIN=$(which maxscale 2>/dev/null)
+    echo "$VERSION|$STATUS|$ENABLED|$PORT|$CONFIG|$BIN"
+    `
+
+	output, err := sc.executeCommand(infoCmd)
+	if err != nil {
+		// Still return basic service info even if detailed check fails
+		return service, fmt.Errorf("failed to get MaxScale details: %w", err)
 	}
 
-	// Check service status - using simple systemctl
-	statusCmd := "systemctl is-active maxscale 2>/dev/null"
-	statusOutput, _ := sc.executeCommand(statusCmd)
-	if strings.TrimSpace(statusOutput) == "active" {
-		service.Status = "Running"
-	} else {
-		service.Status = "Stopped"
-	}
+	parts := strings.Split(output, "|")
+	if len(parts) >= 6 {
+		// Parse version
+		if parts[0] != "" {
+			service.Version = strings.TrimSpace(parts[0])
+		}
 
-	// Check auto-start
-	enabledCmd := "systemctl is-enabled maxscale 2>/dev/null"
-	enabledOutput, _ := sc.executeCommand(enabledCmd)
-	service.AutoStart = strings.TrimSpace(enabledOutput) == "enabled"
+		// Parse status
+		if strings.TrimSpace(parts[1]) == "active" {
+			service.Status = "Running"
+		}
 
-	// Get listening port if running (with fallback to default)
-	if service.Status == "Running" {
-		portCmd := "ss -tulpn 2>/dev/null | grep maxscale | grep LISTEN | awk '{print $5}' | awk -F: '{print $NF}' | head -1"
-		portOutput, _ := sc.executeCommand(portCmd)
-		if portOutput != "" {
-			if port, err := strconv.Atoi(strings.TrimSpace(portOutput)); err == nil && port > 0 {
+		// Parse auto-start
+		service.AutoStart = strings.TrimSpace(parts[2]) == "enabled"
+
+		// Parse port
+		if parts[3] != "" {
+			if port, err := strconv.Atoi(strings.TrimSpace(parts[3])); err == nil && port > 0 {
 				service.Port = port
 			}
 		}
-	}
 
-	// Get install path (simplified)
-	installCmd := "which maxscale 2>/dev/null"
-	installOutput, _ := sc.executeCommand(installCmd)
-	if installOutput != "" {
-		service.InstallPath = "/usr" // Simplified to match expected format
-	}
+		// Parse config file
+		if parts[4] != "" {
+			service.ConfigFile = strings.TrimSpace(parts[4])
+		}
 
-	// Get config file (simplified)
-	configCmd := "find /etc -name maxscale.cnf 2>/dev/null | head -1"
-	configOutput, _ := sc.executeCommand(configCmd)
-	if configOutput != "" {
-		service.ConfigFile = "/etc/maxscale.cnf" // Simplified to match expected format
+		// Parse binary path
+		if parts[5] != "" {
+			service.InstallPath = strings.TrimSpace(parts[5])
+		}
 	}
 
 	return service, nil

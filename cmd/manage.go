@@ -14,6 +14,5 @@ var ManageRootCMD = &cobra.Command{
 
 func init() {
 	ManageRootCMD.AddCommand(manage.ZoneCmd)
-	ManageRootCMD.AddCommand(manage.StatusCMD)
 	ManageRootCMD.AddCommand(manage.ServerCMD)
 }
